@@ -122,6 +122,44 @@ The Grain Store: capacity=170, vegan=no, status=available
 The Ensign Ewart: capacity=120, vegan=yes, status=available
 """
 
+# ─── Expanded dataset for custom experiments (Parts D & E) ────────────────────
+#
+# 29 venues total: the original 9 (with distractors) + 20 new ones.
+# All 20 new venues fail at least one constraint.
+# The correct answers remain: The Albanach and The Haymarket Vaults.
+
+VENUES_EXPANDED = """\
+The Jolly Judge: capacity=55, vegan=yes, status=available
+The Albanach: capacity=180, vegan=yes, status=available
+The Sheep Heid Inn: capacity=140, vegan=yes, status=available
+The Bow Bar: capacity=80, vegan=yes, status=full
+The Brass Monkey: capacity=190, vegan=no, status=available
+The Guilford Arms: capacity=200, vegan=no, status=available
+The Last Drop: capacity=95, vegan=yes, status=full
+The Blue Blazer: capacity=65, vegan=yes, status=available
+The Hanging Bat: capacity=70, vegan=yes, status=available
+The Canny Mans: capacity=110, vegan=no, status=available
+The Oxford Bar: capacity=45, vegan=yes, status=available
+The Dagda Bar: capacity=175, vegan=no, status=full
+The New Town Vault: capacity=162, vegan=no, status=available
+The Holyrood Arms: capacity=160, vegan=yes, status=full
+The Haymarket Vaults: capacity=160, vegan=yes, status=available
+The Athletic Arms: capacity=130, vegan=yes, status=full
+The Grain Store: capacity=170, vegan=no, status=available
+The Bennets Bar: capacity=85, vegan=no, status=available
+The Roseleaf: capacity=60, vegan=yes, status=available
+The Dome: capacity=250, vegan=no, status=available
+The Ensign Ewart: capacity=120, vegan=yes, status=available
+The Kings Wark: capacity=90, vegan=yes, status=full
+The Shore Bar: capacity=155, vegan=yes, status=available
+The Regent: capacity=200, vegan=yes, status=full
+The Scotch Malt Whisky Society: capacity=100, vegan=no, status=available
+The Ventoux: capacity=75, vegan=yes, status=available
+The Lioness of Leith: capacity=165, vegan=no, status=available
+The Scran and Scallie: capacity=145, vegan=no, status=full
+The Stockbridge Tap: capacity=50, vegan=yes, status=available
+"""
+
 # ─── Presentation format builders ─────────────────────────────────────────────
 #
 # PLAIN:    Raw text dump then question.
@@ -182,8 +220,9 @@ def is_correct(answer: str) -> bool:
 
 # ─── Part A ───────────────────────────────────────────────────────────────────
 
-MAIN_MODEL  = "meta-llama/Llama-3.3-70B-Instruct"
-SMALL_MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+MAIN_MODEL     = "meta-llama/Llama-3.3-70B-Instruct"
+SMALL_MODEL    = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+SMALLEST_MODEL = "google/gemma-2-2b-it"  # 2B params — smallest chat model on Nebius
 
 
 def run_part(label: str, venues: str, model: str) -> dict:
@@ -199,12 +238,16 @@ def run_part(label: str, venues: str, model: str) -> dict:
     }
     results = {}
     for name, prompt in conditions.items():
+        print(f"  ┌─── PROMPT ({name}) ───")
+        for line in prompt.splitlines():
+            print(f"  │ {line}")
+        print(f"  └{'─' * 40}")
         r = ask(prompt, model)
         r["correct"]   = is_correct(r["answer"])
         r["condition"] = name
         results[name]  = r
         icon = "✅" if r["correct"] else "❌"
-        print(f"  [{name:<8}] {icon}  →  \"{r['answer']}\"  ({r['tokens']} tokens)")
+        print(f"  [{name:<8}] {icon}  →  \"{r['answer']}\"  ({r['tokens']} tokens)\n")
     return results
 
 
@@ -224,7 +267,9 @@ def print_part_summary(results: dict) -> None:
 
 def main() -> None:
     print("Exercise 1 — Context Engineering Benchmark")
-    print("Three parts. ~2 minutes total.\n")
+    print("Five parts. ~3 minutes total.\n")
+
+    # ── Original Parts A, B, C (unchanged) ──────────────────────────────────
 
     results_a = run_part("PART A — Baseline Dataset", VENUES_BASELINE, MAIN_MODEL)
     print_part_summary(results_a)
@@ -246,13 +291,36 @@ def main() -> None:
     else:
         print("\n  → Structural differences already visible. Skipping Part C.")
 
+    # ── Custom experiments: Parts D & E ─────────────────────────────────────
+
+    print("\n" + "#" * 60)
+    print("  CUSTOM EXPERIMENTS — Expanded Dataset (29 venues)")
+    print("#" * 60)
+
+    results_d = run_part(
+        "PART D (B_EXPANDED) — Expanded Dataset + 70B Model",
+        VENUES_EXPANDED, MAIN_MODEL
+    )
+    print_part_summary(results_d)
+
+    results_e = run_part(
+        "PART E (B_SMALLEST) — Expanded Dataset + Smallest Model (3B)",
+        VENUES_EXPANDED, SMALLEST_MODEL
+    )
+    print_part_summary(results_e)
+
+    # ── Save all results ───────────────────────────────────────────────────
+
     output = {
-        "model_main":  MAIN_MODEL,
-        "model_small": SMALL_MODEL,
-        "part_a":      results_a,
-        "part_b":      results_b,
+        "model_main":     MAIN_MODEL,
+        "model_small":    SMALL_MODEL,
+        "model_smallest": SMALLEST_MODEL,
+        "part_a":         results_a,
+        "part_b":         results_b,
         "part_c_was_run": run_c,
-        "part_c":      results_c,
+        "part_c":         results_c,
+        "part_d_expanded":  results_d,
+        "part_e_smallest":  results_e,
         "summary": {
             "part_a_all_correct": a_all,
             "part_b_all_correct": b_all,
@@ -261,6 +329,8 @@ def main() -> None:
                 else "part_a" if not a_all
                 else "part_b"
             ),
+            "part_d_all_correct": all(r["correct"] for r in results_d.values()),
+            "part_e_all_correct": all(r["correct"] for r in results_e.values()),
         },
     }
 
