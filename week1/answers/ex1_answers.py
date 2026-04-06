@@ -95,16 +95,19 @@ to have extra capacity just in case.
 # "Context formatting matters most when..."
 
 CORE_LESSON = """
-Context formatting matters most when the model is more likely to make mistakes. 
-For example when the dataset is larger or when there are more distractors (although 
-it did not matter in my case). I tried a smaller model with larger dataset 
-and it was still able to get the correct answer in all conditions.
+What I find interesting is that the bigger Llama-3.3-70B model spends 
+less tokens than the smaller one Llama-3.1-8B. More efficient tokeniser?
+Context formatting potentially matters when the dataset is larger 
+or when there are more distractors (although it did not matter in my case). 
+I tried a smaller model with larger dataset and it was still able 
+to get the correct answer in all conditions. 
 In this case the dataset was small and there were only a few distractors, 
-so the formatting did not matter much to find the correct answer.
+so the formatting certainly did not matter to find the correct answer.
 One carefull thought is that XML primes the model to scan top-down 
-(query appears first → evaluate systematically → grab the first valid match = Albanach)
-while plain prompt encourages more free-form search.
-Another theory is that XML's structured format triggers more analytical reasoning, 
-leading the model to prefer the venue with extra headroom (180 vs exactly 160).
+(query appears first → evaluate systematically → grab the first valid match
+ = Albanach). While plain prompting encourages more free-form search.
+Another suggestion is that XML's structured format triggers more 
+analytical reasoning, leading the model to prefer the venue 
+with extra headroom (180 vs exactly 160).
 
 """

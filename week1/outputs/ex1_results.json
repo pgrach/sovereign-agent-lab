@@ -1,7 +1,6 @@
 {
   "model_main": "meta-llama/Llama-3.3-70B-Instruct",
   "model_small": "meta-llama/Meta-Llama-3.1-8B-Instruct",
-  "model_smallest": "google/gemma-2-2b-it",
   "part_a": {
     "PLAIN": {
       "answer": "The Haymarket Vaults",
@@ -72,57 +71,9 @@
       "condition": "SANDWICH"
     }
   },
-  "part_d_expanded": {
-    "PLAIN": {
-      "answer": "The Haymarket Vaults",
-      "tokens": 532,
-      "model": "meta-llama/Llama-3.3-70B-Instruct",
-      "correct": true,
-      "condition": "PLAIN"
-    },
-    "XML": {
-      "answer": "The Albanach",
-      "tokens": 801,
-      "model": "meta-llama/Llama-3.3-70B-Instruct",
-      "correct": true,
-      "condition": "XML"
-    },
-    "SANDWICH": {
-      "answer": "The Albanach",
-      "tokens": 839,
-      "model": "meta-llama/Llama-3.3-70B-Instruct",
-      "correct": true,
-      "condition": "SANDWICH"
-    }
-  },
-  "part_e_smallest": {
-    "PLAIN": {
-      "answer": "The Haymarket Vaults",
-      "tokens": 577,
-      "model": "google/gemma-2-2b-it",
-      "correct": true,
-      "condition": "PLAIN"
-    },
-    "XML": {
-      "answer": "The Haymarket Vaults",
-      "tokens": 898,
-      "model": "google/gemma-2-2b-it",
-      "correct": true,
-      "condition": "XML"
-    },
-    "SANDWICH": {
-      "answer": "The Haymarket Vaults",
-      "tokens": 939,
-      "model": "google/gemma-2-2b-it",
-      "correct": true,
-      "condition": "SANDWICH"
-    }
-  },
   "summary": {
     "part_a_all_correct": true,
     "part_b_all_correct": true,
-    "structural_effect_seen_in": "none_see_part_c",
-    "part_d_all_correct": true,
-    "part_e_all_correct": true
+    "structural_effect_seen_in": "none_see_part_c"
   }
 }
