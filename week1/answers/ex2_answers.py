@@ -24,7 +24,7 @@ TASK_A_CATERING_COST_GBP = 5600.0
 # Did the weather tool return outdoor_ok = True or False?
 TASK_A_OUTDOOR_OK = True
 
-TASK_A_NOTES = """Two issues encountered:
+TASK_A_NOTES = """Three issues encountered:
 1. The original parser looked for Anthropic-format 'tool_use' blocks in content,
    but LangChain/OpenAI stores tool calls in message.tool_calls attribute.
    Fix: replaced the parser to use getattr(m, 'tool_calls', []).
@@ -42,13 +42,13 @@ TASK_A_NOTES = """Two issues encountered:
 # ── Task B ─────────────────────────────────────────────────────────────────
 
 # Has generate_event_flyer been implemented (not just the stub)?
-TASK_B_IMPLEMENTED = None   # True or False
+TASK_B_IMPLEMENTED = True   # True or False
 
 # The image URL returned (or the error message if still a stub).
-TASK_B_IMAGE_URL_OR_ERROR = "FILL_ME_IN"
+TASK_B_IMAGE_URL_OR_ERROR = "https://api.nebius.ai/v1/images/generations/69367657-4620-4084-947f-7f1594896687/image.png"
 
 # The prompt sent to the image model. Copy from terminal output.
-TASK_B_PROMPT_USED = "FILL_ME_IN"
+TASK_B_PROMPT_USED = "Professional event flyer for Edinburgh AI Meetup, tech professionals, modern venue at The Haymarket Vaults, Edinburgh. 160 guests tonight. Warm lighting, Scottish architecture background, clean modern typography."
 
 # ── Task C ─────────────────────────────────────────────────────────────────
 
