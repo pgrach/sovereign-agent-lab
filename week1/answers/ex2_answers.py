@@ -24,7 +24,7 @@ TASK_A_CATERING_COST_GBP = 5600.0
 # Did the weather tool return outdoor_ok = True or False?
 TASK_A_OUTDOOR_OK = True
 
-TASK_A_NOTES = """Three issues encountered:
+TASK_A_NOTES = """Four issues encountered:
 1. The original parser looked for Anthropic-format 'tool_use' blocks in content,
    but LangChain/OpenAI stores tool calls in message.tool_calls attribute.
    Fix: replaced the parser to use getattr(m, 'tool_calls', []).
@@ -36,6 +36,9 @@ TASK_A_NOTES = """Three issues encountered:
    This nudged the model into proper ReAct behavior.
 3. The JSON output shows \u00a3 which is the Unicode escape for £ (pound sterling).
    Not a bug — json.dumps() escapes non-ASCII characters by default.
+4. Since the model confirmed the Albanach as the venue, I got a bit confused
+   as to why task B was still picking the Haymarket Vaults for image gen (which was hardcoded). 
+   In production, I would expect the model output to pass the venue_name to task B. 
 
 """ # optional — anything unexpected
 
@@ -55,41 +58,78 @@ TASK_B_PROMPT_USED = "Professional event flyer for Edinburgh AI Meetup, tech pro
 # Scenario 1: first choice unavailable
 # Quote the specific message where the agent changed course. Min 20 words.
 SCENARIO_1_PIVOT_MOMENT = """
-FILL ME IN
+The Bow Bar does not meet the requirements for 160 vegan guests tonight. 
+However, The Albanach is available and meets all the constraints. The current 
+weather in Edinburgh is clear, making it suitable for an outdoor area at the venue. 
+The estimated total catering cost for the event is £3200. A promotional event flyer 
+image has been generated for The Albanach, which can be accessed at the provided URL.
 """
 
-SCENARIO_1_FALLBACK_VENUE = "FILL_ME_IN"
+SCENARIO_1_FALLBACK_VENUE = "The Albanach"
 
 # Scenario 2: impossible constraint (300 guests)
 # Did the agent recommend a pub name not in the known venues list?
-SCENARIO_2_HALLUCINATED = None   # True or False
+SCENARIO_2_HALLUCINATED = False   # True or False
 
 # Paste the final [AI] message.
 SCENARIO_2_FINAL_ANSWER = """
-FILL ME IN
+None of the known venues meet the capacity and dietary requirements.
 """
 
 # Scenario 3: out of scope (train times)
 # Did the agent try to call a tool?
-SCENARIO_3_TRIED_A_TOOL = None   # True or False
+SCENARIO_3_TRIED_A_TOOL = True   # True or False
 
-SCENARIO_3_RESPONSE = "FILL_ME_IN"
+SCENARIO_3_RESPONSE = """
+  I cannot perform this task as it requires additional functionality beyond 
+  what is available in the given functions.
+"""
 
 # Would this behaviour be acceptable in a real booking assistant? Min 30 words.
 SCENARIO_3_ACCEPTABLE = """
-FILL ME IN
+Yes, this behaviour would be acceptable in a real booking assistant. 
+It is important for the assistant to be able to handle requests that are 
+outside of its scope and to inform the user about its limitations.
+It is also important for the assistant to be able to handle requests that 
+are outside of its scope and to inform the user about its limitations.
 """
 
 # ── Task D ─────────────────────────────────────────────────────────────────
 
 # Paste the Mermaid output from `python exercise2_langgraph.py task_d` here.
 TASK_D_MERMAID_OUTPUT = """
-PASTE MERMAID OUTPUT HERE
-"""
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+        __start__([<p>__start__</p>]):::first
+        agent(agent)
+        tools(tools)
+        __end__([<p>__end__</p>]):::last
+        __start__ --> agent;
+        agent -.-> __end__;
+        agent -.-> tools;
+        tools --> agent;
+        classDef default fill:#f2f0ff,line-height:1.2
+        classDef first fill-opacity:0
+        classDef last fill:#bfb6fc
+        """
 
 # Compare the LangGraph graph to exercise3_rasa/data/rules.yml. Min 30 words.
 TASK_D_COMPARISON = """
-FILL ME IN
+LangGraph's Mermaid output shows a single cyclic graph: __start__ -> agent <-> tools -> __end__.
+The LLM decides at every step whether to call a tool or emit a final answer. All routing is implicit.
+
+Rasa CALM's flows.yml (note: the answer template says rules.yml but the actual file is
+exercise3_rasa/data/flows.yml) defines explicit, deterministic flows (e.g. confirm_booking)
+with ordered steps: collect guest_count, collect vegan_count, collect deposit, then run
+action_validate_booking. The LLM only decides WHICH flow to start; after that, Rasa executes
+steps in a fixed sequence.
+
+Trade-off: LangGraph is flexible but unpredictable (the agent can improvise, retry, or
+hallucinate). Rasa CALM is rigid but auditable -- every path is readable and explicit.
 """
 
 # ── Reflection ─────────────────────────────────────────────────────────────
@@ -98,5 +138,18 @@ FILL ME IN
 # Must reference a specific behaviour from your run.
 
 MOST_SURPRISING = """
-FILL ME IN
+In Scenario 3 (out-of-scope train times), the agent tried to call get_last_train_time — a tool
+that does not exist. Rather than refusing outright, it invented a plausible function name and
+attempted the call. LangGraph caught the error and returned 'not a valid tool', at which point
+the agent recovered gracefully. This shows Llama does not validate tool names against the
+registry before calling — it relies on the framework's error handling as a safety net.
+
+Additionally, without explicit fallback instructions in the prompt (my pivot experiment 
+where i removed the prompt to check other venues if the first one fails), the agent 
+simply reported failure instead of proactively checking other venues.
+
+Image generation outputs are really ugly. I would not use it in production, it 
+hallucinates objects, cannot draw words or numbers, and the quality is very low overall.
+
+
 """
