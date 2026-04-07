@@ -24,8 +24,7 @@ TASK_A_CATERING_COST_GBP = 5600.0
 # Did the weather tool return outdoor_ok = True or False?
 TASK_A_OUTDOOR_OK = True
 
-TASK_A_NOTES = 
-"""Two issues encountered:
+TASK_A_NOTES = """Two issues encountered:
 1. The original parser looked for Anthropic-format 'tool_use' blocks in content,
    but LangChain/OpenAI stores tool calls in message.tool_calls attribute.
    Fix: replaced the parser to use getattr(m, 'tool_calls', []).
