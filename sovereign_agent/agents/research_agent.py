@@ -11,7 +11,7 @@ This is the file that grows each week:
   Week 4:          Add CLAUDE.md memory so the agent remembers past sessions
   Week 5:          Add observability, cost tracking, and safety guardrails
 
-The public interface — run_research_agent(task, max_turns) → dict — stays the
+The public interface -- run_research_agent(task, max_turns) -> dict -- stays the
 same across all weeks. Week 2's code imports and calls this function exactly
 as Week 1 leaves it. You add capability inside; the callers don't change.
 
@@ -31,7 +31,7 @@ Import and call from exercise files:
 ADDING TOOLS IN FUTURE WEEKS
 -----------------------------
 To add a new tool, import it and add it to the TOOLS list below.
-The agent picks up the new capability automatically — no other changes needed.
+The agent picks up the new capability automatically -- no other changes needed.
 
     # Week 2 example:
     from sovereign_agent.tools.web_search import search_web
@@ -40,7 +40,7 @@ The agent picks up the new capability automatically — no other changes needed.
         get_edinburgh_weather,
         calculate_catering_cost,
         generate_event_flyer,
-        search_web,           # ← just add here
+        search_web,           # <- just add here
     ]
 """
 
@@ -51,7 +51,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
 # Import tools from the shared tool layer
-# This import path is why the project structure matters —
+# This import path is why the project structure matters --
 # sovereign_agent/ is a Python package that can be imported from anywhere
 from sovereign_agent.tools.venue_tools import (
     check_pub_availability,
@@ -62,7 +62,7 @@ from sovereign_agent.tools.venue_tools import (
 
 load_dotenv()
 
-# ─── Model ────────────────────────────────────────────────────────────────────
+# --- Model -------------------------------------------------------------------
 # Week 1: single model handles everything
 # Week 3: this gets split into llm_planner (DeepSeek R1) and llm_executor (Llama 70B)
 
@@ -73,7 +73,7 @@ llm = ChatOpenAI(
     temperature=0,
 )
 
-# ─── Tool registry ────────────────────────────────────────────────────────────
+# --- Tool registry ------------------------------------------------------------
 # Week 1: 4 venue tools
 # Week 2: add search_web, read_file, write_file here
 
@@ -86,10 +86,20 @@ TOOLS = [
 
 # Build the agent once at module load time.
 # Rebuilding it on every call would be wasteful.
-_agent = create_react_agent(llm, TOOLS)
+# The system prompt ensures the model uses native tool calling one-at-a-time
+# instead of dumping all planned calls as text (a known Llama behavior).
+_agent = create_react_agent(
+    llm,
+    TOOLS,
+    prompt=(
+        "You are a research assistant. Always use the available tools to gather "
+        "information before responding. Never answer from memory alone. "
+        "Work through tasks step by step, calling one tool at a time."
+    ),
+)
 
 
-# ─── Public interface ─────────────────────────────────────────────────────────
+# --- Public interface ---------------------------------------------------------
 
 def run_research_agent(task: str, max_turns: int = 8) -> dict:
     """
@@ -101,10 +111,10 @@ def run_research_agent(task: str, max_turns: int = 8) -> dict:
 
     Returns:
         dict with keys:
-          final_answer:    str — the agent's final response
-          tool_calls_made: list of dicts — each tool call with name and args
-          full_trace:      list of dicts — every message in the conversation
-          success:         bool — True if agent gave a final answer (not max_turns)
+          final_answer:    str -- the agent's final response
+          tool_calls_made: list of dicts -- each tool call with name and args
+          full_trace:      list of dicts -- every message in the conversation
+          success:         bool -- True if agent gave a final answer (not max_turns)
 
     This return shape is the contract that Week 2+ code will depend on.
     Do not change the key names.
@@ -115,23 +125,23 @@ def run_research_agent(task: str, max_turns: int = 8) -> dict:
     )
 
     tool_calls_made = []
-    full_trace      = []
-    final_answer    = ""
+    full_trace = []
+    final_answer = ""
 
     for m in result["messages"]:
-        role    = getattr(m, "type", "unknown")
+        role = getattr(m, "type", "unknown")
         content = m.content
 
-        # Tool-call messages have structured list content
-        if isinstance(content, list):
-            for block in content:
-                if isinstance(block, dict) and block.get("type") == "tool_use":
-                    entry = {
-                        "tool": block["name"],
-                        "args": block.get("input", {}),
-                    }
-                    tool_calls_made.append(entry)
-                    full_trace.append({"role": "tool_call", **entry})
+        # LangChain OpenAI-compatible format: tool calls are in message.tool_calls
+        tool_calls = getattr(m, "tool_calls", [])
+        if tool_calls:
+            for tc in tool_calls:
+                entry = {
+                    "tool": tc["name"],
+                    "args": tc.get("args", {}),
+                }
+                tool_calls_made.append(entry)
+                full_trace.append({"role": "tool_call", **entry})
             continue
 
         if content:
@@ -140,8 +150,8 @@ def run_research_agent(task: str, max_turns: int = 8) -> dict:
                 final_answer = str(content)
 
     return {
-        "final_answer":    final_answer,
+        "final_answer": final_answer,
         "tool_calls_made": tool_calls_made,
-        "full_trace":      full_trace,
-        "success":         bool(final_answer),
+        "full_trace": full_trace,
+        "success": bool(final_answer),
     }

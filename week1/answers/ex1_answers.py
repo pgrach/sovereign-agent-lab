@@ -61,10 +61,11 @@ PART_B_HARDEST_DISTRACTOR = """
 Adding near miss distractors did not change the results for this dataset. 
 I think the Holyrood Arms was the most dangerous distractor because it satisfied 
 capacity and vegan constraints, only failing on status.
-But I also decided to try a couple of experiments:
-1. with expanded dataset (added 20 more venues) with the same model. And I got 
+But I also experimented with:
+1. expanded dataset (added 20 more venues) with the same model. And I got 
 the same output.
-2. with another (even with 4x smaller than in Part C) model. It still got everything right.
+2. another model (even with 4x smaller than Part C). It still got 
+everything right.
 
 """
 

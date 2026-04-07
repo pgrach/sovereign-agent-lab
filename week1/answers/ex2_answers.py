@@ -11,20 +11,34 @@ Run `python grade.py ex2` to check for obvious issues.
 # Look at [TOOL_CALL] lines in your terminal output.
 # Example: ["check_pub_availability", "get_edinburgh_weather"]
 
-TASK_A_TOOLS_CALLED = []
+TASK_A_TOOLS_CALLED = ["check_pub_availability", "get_edinburgh_weather", "calculate_catering_cost", "generate_event_flyer"]
 
 # Which venue did the agent confirm? Must be one of:
 # "The Albanach", "The Haymarket Vaults", or "none"
-TASK_A_CONFIRMED_VENUE = "FILL_ME_IN"
+TASK_A_CONFIRMED_VENUE = "The Albanach" # "The Haymarket Vaults" also recognised as meeting all constraints
 
 # Total catering cost the agent calculated. Float, e.g. 5600.0
 # Write 0.0 if the agent didn't calculate it.
-TASK_A_CATERING_COST_GBP = 0.0
+TASK_A_CATERING_COST_GBP = 5600.0
 
 # Did the weather tool return outdoor_ok = True or False?
-TASK_A_OUTDOOR_OK = None
+TASK_A_OUTDOOR_OK = True
 
-TASK_A_NOTES = ""   # optional — anything unexpected
+TASK_A_NOTES = 
+"""Two issues encountered:
+1. The original parser looked for Anthropic-format 'tool_use' blocks in content,
+   but LangChain/OpenAI stores tool calls in message.tool_calls attribute.
+   Fix: replaced the parser to use getattr(m, 'tool_calls', []).
+2. Llama-3.3-70B on Nebius, given a complex multi-step prompt, dumped all planned
+   tool calls as a JSON text string instead of using native function calling.
+   The model was 'planning' rather than 'executing'. Fix (credit: shakirali - on discord):
+   added a system prompt to create_react_agent instructing the model to
+   'work through tasks step by step, calling one tool at a time'.
+   This nudged the model into proper ReAct behavior.
+3. The JSON output shows \u00a3 which is the Unicode escape for £ (pound sterling).
+   Not a bug — json.dumps() escapes non-ASCII characters by default.
+
+""" # optional — anything unexpected
 
 # ── Task B ─────────────────────────────────────────────────────────────────
 

@@ -75,7 +75,7 @@ def print_result(result: dict, label: str) -> None:
         role = entry["role"].upper()
         if role == "TOOL_CALL":
             args_str = json.dumps(entry.get("args", {}))[:80]
-            print(f"  [TOOL_CALL] → {entry['tool']}({args_str})")
+            print(f"  [TOOL_CALL] -> {entry['tool']}({args_str})")
         else:
             content = entry.get("content", "")
             if len(content) > 500:
@@ -119,7 +119,7 @@ def task_a() -> dict:
         for tc in result["tool_calls_made"]:
             print(f"    - {tc['tool']}")
 
-    print("\n→ Record results in week1/answers/ex2_answers.py")
+    print("\n-> Record results in week1/answers/ex2_answers.py")
     return result
 
 
@@ -201,7 +201,7 @@ def task_c() -> list:
     print_result(r3, "TASK C / Scenario 3 — Out of Scope")
     results.append(r3)
 
-    print("\n→ Answer the Scenario questions in week1/answers/ex2_answers.py")
+    print("\n-> Answer the Scenario questions in week1/answers/ex2_answers.py")
     return results
 
 
