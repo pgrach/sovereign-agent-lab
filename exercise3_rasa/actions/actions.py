@@ -118,7 +118,7 @@ class ActionValidateBooking(Action):
         now = datetime.datetime.now()
         if now.hour > 16 or (now.hour == 16 and now.minute >= 45):
             return escalate(
-                "it is past 16:45 — insufficient time to process the confirmation"
+                "it is past 16:45 -- insufficient time to process the confirmation"
                 " before the 5 PM deadline"
             )
 

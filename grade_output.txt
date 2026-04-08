@@ -1,0 +1,99 @@
+﻿python.exe : C:\Users\gpu20\OneDrive\Desktop\Nebius Academy\Agents\sovereign-agent-lab\.ven
+v\Lib\site-packages\langchain_core\_api\deprecation.py:25: UserWarning: Core Pydantic V1 
+functionality isn't compatible with Python 3.14 or greater.
+At line:1 char:24
++ ... NUTF8 = "1"; & ".venv/Scripts/python.exe" week1/grade.py 2>&1 | Out-F ...
++                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\gpu20\....14 or greater.:String) [], 
+    RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  from pydantic.v1.fields import FieldInfo as FieldInfoV1
+Week 1 — Mechanical Grade Check
+============================================================
+(Checks code runs and answers are filled in.
+ Reasoning quality and behavioural correctness
+ are graded separately by the instructor.)
+
+
+── Exercise 1 ──────────────────────────────────────────
+  ✅  outputs/ex1_results.json exists and is valid
+  ✅  PART_A_PLAIN_ANSWER filled in
+  ✅  PART_A_XML_ANSWER filled in
+  ✅  PART_A_SANDWICH_ANSWER filled in
+  ✅  PART_B_PLAIN_ANSWER filled in
+  ✅  PART_B_XML_ANSWER filled in
+  ✅  PART_B_SANDWICH_ANSWER filled in
+  ✅  PART_A_PLAIN_CORRECT set to True or False
+  ✅  PART_A_XML_CORRECT set to True or False
+  ✅  PART_A_SANDWICH_CORRECT set to True or False
+  ✅  PART_B_PLAIN_CORRECT set to True or False
+  ✅  PART_B_XML_CORRECT set to True or False
+  ✅  PART_B_SANDWICH_CORRECT set to True or False
+  ✅  PART_B_CHANGED_RESULTS set to True or False
+  ✅  PART_C_WAS_RUN set to True or False
+  ✅  PART_A_EXPLANATION filled in and ≥ 30 words (found 200)
+  ✅  PART_B_HARDEST_DISTRACTOR filled in and ≥ 20 words (found 70)
+  ✅  PART_C_EXPLANATION filled in and ≥ 30 words (found 102)
+  ✅  CORE_LESSON filled in and ≥ 40 words (found 149)
+
+── Exercise 2 ──────────────────────────────────────────
+  ✅  outputs/ex2_results.json exists and is valid
+  ✅  sovereign_agent/venue_tools.py imports without error
+  ✅  sovereign_agent/research_agent.py imports without error
+  ⚠️  Could not call generate_event_flyer directly: generate_event_flyer() got an unexpected keyword argument 'pub_name'
+  ✅  TASK_A_TOOLS_CALLED has ≥ 2 entries (found 4)
+  ✅  TASK_A_CONFIRMED_VENUE is a known venue name (got: 'The Albanach')
+  ✅  TASK_A_OUTDOOR_OK set to True or False
+  ✅  TASK_B_IMPLEMENTED set to True or False
+  ✅  SCENARIO_2_HALLUCINATED set to True or False
+  ✅  SCENARIO_3_TRIED_A_TOOL set to True or False
+  ✅  TASK_D_MERMAID_OUTPUT contains Mermaid graph syntax
+  ✅  SCENARIO_1_PIVOT_MOMENT filled in and ≥ 20 words (found 69)
+  ✅  SCENARIO_3_ACCEPTABLE filled in and ≥ 30 words (found 64)
+  ✅  TASK_D_COMPARISON filled in and ≥ 30 words (found 111)
+  ✅  MOST_SURPRISING filled in and ≥ 40 words (found 139)
+
+── Exercise 3 ──────────────────────────────────────────
+  ✅  config.yml exists
+  ✅  domain.yml exists
+  ✅  endpoints.yml exists
+  ✅  data/flows.yml (CALM flows) exists
+  ✅  Cutoff guard is uncommented in exercise3_rasa/actions/actions.py
+  ⚠️  FormValidationAction found — not needed in CALM (from_llm slots handle extraction)
+  ✅  CONVERSATION_1_TRACE filled in
+  ✅  CONVERSATION_1_TRACE looks like real rasa shell output
+  ✅  CONVERSATION_2_TRACE filled in
+  ✅  CONVERSATION_2_TRACE looks like real rasa shell output
+  ✅  CONVERSATION_3_TRACE filled in
+  ✅  CONVERSATION_3_TRACE looks like real rasa shell output
+  ✅  CONVERSATION_1_OUTCOME is 'confirmed' or 'escalated' (got: 'confirmed')
+  ✅  CONVERSATION_2_OUTCOME is 'escalated' for over-limit deposit
+  ✅  TASK_B_DONE = True
+  ✅  TASK_B_FILES_CHANGED lists at least 1 file (found 1)
+  ✅  OUT_OF_SCOPE_COMPARISON filled in and ≥ 40 words (found 101)
+  ✅  SETUP_COST_VALUE filled in and ≥ 40 words (found 123)
+  ✅  TASK_B_HOW_YOU_TESTED filled in and ≥ 20 words (found 138)
+  ✅  CALM_VS_OLD_RASA filled in and ≥ 30 words (found 124)
+
+── Exercise 4 ──────────────────────────────────────────
+  ✅  sovereign_agent/tools/mcp_venue_server.py exists
+  ✅  outputs/ex4_results.json exists and is valid
+  ❌  TOOLS_DISCOVERED has ≥ 2 entries (found 0)
+  ❌  QUERY_1_VENUE_NAME filled in
+  ❌  QUERY_1_VENUE_ADDRESS filled in
+  ❌  QUERY_2_FINAL_ANSWER filled in
+  ❌  EX4_EXPERIMENT_DONE = True (you modified venue_server.py and re-ran)
+  ❌  EX4_EXPERIMENT_RESULT filled in and ≥ 30 words (found 3)
+  ❌  MCP_VALUE_PROPOSITION filled in and ≥ 30 words (found 3)
+  ❌  GUIDING_QUESTION_ANSWER filled in and ≥ 60 words (found 3)
+  ❌  WEEK_5_ARCHITECTURE has ≥ 5 bullet points (found 5)
+
+────────────────────────────────────────────────────────────
+  Passed:   54
+  Failed:   9
+  Warnings: 2
+
+  Fix the 9 failure(s) above before submitting.
+  Run `uv run pytest sovereign_agent/tests/test_week1.py -v`
+  for more specific error messages on tool failures.

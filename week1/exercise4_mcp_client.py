@@ -86,6 +86,11 @@ async def discover_tools(server_script: str) -> list:
     mcp_venue_server.py and this function picks it up automatically.
     No changes needed here.
     """
+    from pydantic import create_model
+
+    # Map JSON Schema types to Python types
+    _type_map = {"string": str, "integer": int, "number": float, "boolean": bool}
+
     params = StdioServerParameters(command=sys.executable, args=[server_script])
     async with stdio_client(params) as (r, w):
         async with ClientSession(r, w) as session:
@@ -93,10 +98,20 @@ async def discover_tools(server_script: str) -> list:
             raw   = await session.list_tools()
             tools = []
             for t in raw.tools:
+                # Build a Pydantic model from the MCP tool's inputSchema
+                fields = {}
+                schema = t.inputSchema or {}
+                for pname, pinfo in schema.get("properties", {}).items():
+                    py_type = _type_map.get(pinfo.get("type", "string"), str)
+                    fields[pname] = (py_type, ...)
+
+                args_model = create_model(f"{t.name}_args", **fields)
+
                 lc_tool = StructuredTool.from_function(
                     func=_make_mcp_caller(t.name, server_script),
                     name=t.name,
                     description=t.description or f"MCP tool: {t.name}",
+                    args_schema=args_model,
                 )
                 tools.append(lc_tool)
             return tools, [t.name for t in raw.tools]
@@ -109,11 +124,12 @@ def extract_trace(result: dict) -> list:
     for m in result["messages"]:
         role    = getattr(m, "type", "unknown")
         content = m.content
-        if isinstance(content, list):
-            for block in content:
-                if isinstance(block, dict) and block.get("type") == "tool_use":
-                    trace.append({"role": "tool_call", "tool": block["name"],
-                                  "args": block.get("input", {})})
+        # LangChain OpenAI-compatible format: tool calls in message.tool_calls
+        tool_calls = getattr(m, "tool_calls", [])
+        if tool_calls:
+            for tc in tool_calls:
+                trace.append({"role": "tool_call", "tool": tc["name"],
+                              "args": tc.get("args", {})})
         elif content:
             trace.append({"role": role, "content": str(content)})
     return trace
@@ -123,7 +139,7 @@ def print_trace(trace: list) -> None:
     for entry in trace:
         if entry["role"] == "tool_call":
             args_str = json.dumps(entry.get("args", {}))[:80]
-            print(f"  [TOOL_CALL] → {entry['tool']}({args_str})")
+            print(f"  [TOOL_CALL] -> {entry['tool']}({args_str})")
         elif entry.get("content"):
             content = entry["content"]
             if len(content) > 400:
@@ -145,7 +161,15 @@ async def main() -> None:
     tools, tool_names = await discover_tools(SERVER_SCRIPT)
     print(f"\n  Discovered {len(tools)} tools: {tool_names}")
 
-    agent  = create_react_agent(llm, tools)
+    agent  = create_react_agent(
+        llm,
+        tools,
+        prompt=(
+            "You are a research assistant. Always use the available tools to gather "
+            "information before responding. Never answer from memory alone. "
+            "Work through tasks step by step, calling one tool at a time."
+        ),
+    )
     output = {"server_script": SERVER_SCRIPT, "tools_discovered": tool_names, "queries": {}}
 
     # ── Query 1: search + detail fetch ────────────────────────────────────────
@@ -153,7 +177,7 @@ async def main() -> None:
     print(f"\n{'=' * 65}")
     print("  Query 1 — Search + Detail Fetch")
     print(f"{'=' * 65}\n")
-    r1     = agent.invoke({"messages": [("user", q1)]})
+    r1     = agent.invoke({"messages": [("user", q1)]}, {"recursion_limit": 15})
     trace1 = extract_trace(r1)
     print_trace(trace1)
     output["queries"]["query_1"] = {"query": q1, "trace": trace1}
@@ -163,8 +187,13 @@ async def main() -> None:
     print(f"\n{'=' * 65}")
     print("  Query 2 — Impossible Constraint")
     print(f"{'=' * 65}\n")
-    r2     = agent.invoke({"messages": [("user", q2)]})
-    trace2 = extract_trace(r2)
+    try:
+        r2     = agent.invoke({"messages": [("user", q2)]}, {"recursion_limit": 15})
+        trace2 = extract_trace(r2)
+    except Exception as e:
+        print(f"  [Agent hit recursion limit: {type(e).__name__}]")
+        trace2 = [{"role": "human", "content": q2},
+                  {"role": "ai", "content": f"Agent looped until recursion limit: {e}"}]
     print_trace(trace2)
     output["queries"]["query_2"] = {"query": q2, "trace": trace2}
 
